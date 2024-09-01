@@ -30,7 +30,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let background = SKSpriteNode(imageNamed: "background.jpg")
         background.position = CGPoint(x: width / 2.0, y: height / 2.0)
         background.blendMode = .replace
-        background.zPosition = -1
+        background.zPosition = -2
         addChild(background)
         
         // Border limits
@@ -102,14 +102,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func makeBall(location: CGPoint){
-        let ball = SKSpriteNode(imageNamed: "ballRed")
+        let balls = ["ballRed", "ballBlue", "ballCyan", "ballGreen", "ballGrey", "ballPurple", "ballYellow"]
+        let ball = SKSpriteNode(imageNamed: balls.randomElement() ?? balls[0])
         ball.position = location
         ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width / 2.0)
        
         // Bounciness
         ball.physicsBody?.restitution = 1
         
-        // Notify every collition
+        // Notify every collitions
         ball.physicsBody?.contactTestBitMask = ball.physicsBody!.collisionBitMask
         ball.name = "ball"
         addChild(ball)
@@ -154,6 +155,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         slotBase.position = position
         slotGlow.position = position
+        slotGlow.zPosition = -1
         
         slotBase.physicsBody = SKPhysicsBody(rectangleOf: slotBase.size)
         slotBase.physicsBody?.isDynamic = false
@@ -181,6 +183,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func destroy(ball: SKNode){
+        if let fireParticles = SKEmitterNode(fileNamed: "FireParticles"){
+            fireParticles.position = ball.position
+            addChild(fireParticles)
+        }
         ball.removeFromParent()
     }
     
