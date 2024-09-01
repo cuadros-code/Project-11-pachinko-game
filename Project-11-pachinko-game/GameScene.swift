@@ -4,6 +4,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var scoreLabel: SKLabelNode!
     var editLabel: SKLabelNode!
+    var limitLabel: SKLabelNode!
     
     var score = 0 {
         didSet {
@@ -18,6 +19,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             } else {
                 editLabel.text = "Edit"
             }
+        }
+    }
+    
+    var limit = 5 {
+        didSet {
+            limitLabel.text = "Balls: \(limit)"
         }
     }
     
@@ -66,12 +73,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         editLabel.fontSize = 20
         editLabel.position = CGPoint(x: 60, y: 350)
         addChild(editLabel)
+        
+        limitLabel = SKLabelNode(fontNamed: "Chalkduster")
+        limitLabel.text = "Balls: 5"
+        limitLabel.fontSize = 22
+        limitLabel.position = CGPoint(x: 422, y: 350)
+        addChild(limitLabel)
     }
     
     // Check ball collision on the other objects
     func didBegin(_ contact: SKPhysicsContact) {
         guard let nodeA = contact.bodyA.node else { return }
         guard let nodeB = contact.bodyB.node else { return }
+        
+        if nodeA.name == "obstacle" {
+            nodeA.removeFromParent()
+        } else if nodeB.name == "obstacle" {
+            nodeB.removeFromParent()
+        }
         
         if contact.bodyA.node?.name == "ball" {
             collisionBetween(ball: nodeA, object: nodeB)
@@ -102,6 +121,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func makeBall(location: CGPoint){
+        if limit <= 0 { return }
+        limit -= 1
         let balls = ["ballRed", "ballBlue", "ballCyan", "ballGreen", "ballGrey", "ballPurple", "ballYellow"]
         let ball = SKSpriteNode(imageNamed: balls.randomElement() ?? balls[0])
         ball.position = CGPoint(x: location.x, y: 390) //location
@@ -125,6 +146,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             alpha: 1
         ), size: size)
         
+        box.name = "obstacle"
         box.zRotation = CGFloat.random(in: 0...3)
         box.position = location
         box.physicsBody = SKPhysicsBody(rectangleOf: box.size)
