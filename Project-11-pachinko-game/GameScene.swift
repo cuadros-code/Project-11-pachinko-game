@@ -1,9 +1,9 @@
 import SpriteKit
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func didMove(to view: SKView) {
- 
+        
         let width = frame.size.width
         let height = frame.size.height
         
@@ -17,6 +17,9 @@ class GameScene: SKScene {
         // Border limits
         physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
         
+        // From SKPhysicsContactDelegate
+        physicsWorld.contactDelegate = self
+        
         makeBouncer(at: CGPoint(x: 0, y: 0))
         makeBouncer(at: CGPoint(x: 211, y: 0))
         makeBouncer(at: CGPoint(x: 422, y: 0))
@@ -26,7 +29,21 @@ class GameScene: SKScene {
         makeSlot(at: CGPoint(x: 105, y: 0), isGood: true)
         makeSlot(at: CGPoint(x: 315, y: 0), isGood: false)
         makeSlot(at: CGPoint(x: 527, y: 0), isGood: true)
-        makeSlot(at: CGPoint(x: 737, y: 0), isGood: false)    }
+        makeSlot(at: CGPoint(x: 737, y: 0), isGood: false)
+    }
+    
+    // Check ball collision on the other objects
+    func didBegin(_ contact: SKPhysicsContact) {
+        
+        guard let nodeA = contact.bodyA.node else { return }
+        guard let nodeB = contact.bodyB.node else { return }
+        
+        if contact.bodyA.node?.name == "ball" {
+            collisionBetween(ball: nodeA, object: nodeB)
+        } else if contact.bodyB.node?.name == "ball"{
+            collisionBetween(ball: nodeB, object: nodeA)
+        }
+    }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
@@ -34,7 +51,9 @@ class GameScene: SKScene {
             let ball = SKSpriteNode(imageNamed: "ballRed")
             ball.position = location
             ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width / 2.0)
-            ball.physicsBody?.restitution = 0.4 // bounciness
+            ball.physicsBody?.restitution = 1 // bounciness
+            // Notify every collition
+            ball.physicsBody?.contactTestBitMask = ball.physicsBody!.collisionBitMask
             ball.name = "ball"
             addChild(ball)
         }
@@ -70,10 +89,27 @@ class GameScene: SKScene {
         addChild(slotBase)
         addChild(slotGlow)
         
+        spinAnimation(slotGlow)
+    }
+    
+    func spinAnimation(_ slotGlow: SKSpriteNode){
         let spin = SKAction.rotate(byAngle: .pi, duration: 10)
         let spinForever = SKAction.repeatForever(spin)
         slotGlow.run(spinForever)
-        
     }
+    
+    func collisionBetween(ball: SKNode, object: SKNode){
+        if object.name == "good" {
+            destroy(ball: ball)
+        } else if object.name == "bad" {
+            destroy(ball: ball)
+        }
+    }
+    
+    func destroy(ball: SKNode){
+        ball.removeFromParent()
+    }
+    
+    
     
 }
