@@ -104,7 +104,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func makeBall(location: CGPoint){
         let balls = ["ballRed", "ballBlue", "ballCyan", "ballGreen", "ballGrey", "ballPurple", "ballYellow"]
         let ball = SKSpriteNode(imageNamed: balls.randomElement() ?? balls[0])
-        ball.position = location
+        ball.position = CGPoint(x: location.x, y: 390) //location
         ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width / 2.0)
        
         // Bounciness
