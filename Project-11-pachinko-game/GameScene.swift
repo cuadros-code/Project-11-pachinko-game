@@ -2,6 +2,15 @@ import SpriteKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
+    var scoreLabel: SKLabelNode!
+    
+    var score = 0 {
+        didSet {
+            scoreLabel.text = "Score: \(score)"
+        }
+    }
+    
+    
     override func didMove(to view: SKView) {
         
         let width = frame.size.width
@@ -30,11 +39,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         makeSlot(at: CGPoint(x: 315, y: 0), isGood: false)
         makeSlot(at: CGPoint(x: 527, y: 0), isGood: true)
         makeSlot(at: CGPoint(x: 737, y: 0), isGood: false)
+        
+        addLabelScore()
+    }
+    
+    func addLabelScore(){
+        scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+        scoreLabel.text = "Score: 0"
+        scoreLabel.fontSize = 18
+        scoreLabel.horizontalAlignmentMode = .right
+        scoreLabel.position = CGPoint(x: 824, y: 350)
+        addChild(scoreLabel)
     }
     
     // Check ball collision on the other objects
     func didBegin(_ contact: SKPhysicsContact) {
-        
         guard let nodeA = contact.bodyA.node else { return }
         guard let nodeB = contact.bodyB.node else { return }
         
@@ -51,7 +70,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let ball = SKSpriteNode(imageNamed: "ballRed")
             ball.position = location
             ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width / 2.0)
-            ball.physicsBody?.restitution = 1 // bounciness
+           
+            // Bounciness
+            ball.physicsBody?.restitution = 1
+            
             // Notify every collition
             ball.physicsBody?.contactTestBitMask = ball.physicsBody!.collisionBitMask
             ball.name = "ball"
@@ -101,8 +123,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func collisionBetween(ball: SKNode, object: SKNode){
         if object.name == "good" {
             destroy(ball: ball)
+            score += 1
         } else if object.name == "bad" {
             destroy(ball: ball)
+            score -= 1
         }
     }
     
